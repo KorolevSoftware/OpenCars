@@ -1,0 +1,3 @@
+﻿main.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: __thiscall reactphysics3d::SphereShape::SphereShape(float)" (??0SphereShape@reactphysics3d@@QAE@M@Z) в функции _main
+E:\Project\Develop\OpenCars\\lib\reactphysics3d-0.7.0\Debug\reactphysics3d.lib : warning LNK4272: тип компьютера библиотеки "x64" конфликтует с типом целевого компьютера "x86"
+E:\Project\Develop\OpenCars\Debug\OpenCars.exe : fatal error LNK1120: неразрешенных внешних элементов: 1

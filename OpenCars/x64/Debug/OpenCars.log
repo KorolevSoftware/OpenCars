@@ -1,0 +1,19 @@
+﻿  compilation object save succeeded; see E:\Project\Develop\OpenCars\x64\Debug\simpleVertexShader.cso
+  DirectX11Engine.cpp
+  main.cpp
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\engine\dynamicsworld.h(387): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\engine\dynamicsworld.h(395): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\halfedgestructure.h(135): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\shapes\heightfieldshape.h(256): warning C4244: return: преобразование "double" в "reactphysics3d::decimal", возможна потеря данных
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\shapes\heightfieldshape.h(264): warning C4244: return: преобразование "reactphysics3d::decimal" в "int", возможна потеря данных
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\trianglemesh.h(95): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
+e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\containers\set.h(502): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+  e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\containers\set.h(449): note: при компиляции функции-члена "<Нет данных>" класса класс <Нет данных>
+  e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\collisiondetection.h(265): note: выполняется компиляция ссылки на экземпляр шаблон функции "void reactphysics3d::Set<reactphysics3d::bodyindexpair>::add(const V &)"
+          with
+          [
+              V=reactphysics3d::bodyindexpair
+          ]
+  e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\collisiondetection.h(89): note: выполняется компиляция ссылки на экземпляр шаблон класс "reactphysics3d::Set<reactphysics3d::bodyindexpair>"
+  Создание кода...
+  OpenCars.vcxproj -> E:\Project\Develop\OpenCars\x64\Debug\OpenCars.exe
