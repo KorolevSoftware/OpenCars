@@ -1,12 +1,32 @@
 #include "DirectX11Engine.h"
-
+#include <directxmath.h>
 LRESULT CALLBACK WndProc(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	PAINTSTRUCT ps;
+	HDC hdc;
 	switch (message)
 	{
+	case WM_KEYDOWN:
+	{
+		switch (wParam)
+		{
+			// Если нажали Esc - выходим
+		case VK_ESCAPE:
+			PostQuitMessage(0);
+			break;
+		}
+		break;
+	}
+	case WM_PAINT:
+	{
+		hdc = BeginPaint(hWND, &ps);
+		EndPaint(hWND, &ps);
+		break;
+	}
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
-
+		
 	default:
 		return DefWindowProc(hWND, message, wParam, lParam);
 	}
@@ -23,7 +43,6 @@ void DirectX11Engine::createWindows(bool fullScreen, int width, int height)
 
 void DirectX11Engine::init()
 {
-
 	if (FAILED(initWindow()))
 		return;
 
@@ -33,99 +52,45 @@ void DirectX11Engine::init()
 
 void DirectX11Engine::render()
 {
-	
+	static float t = 0.0f;
+	static ULONGLONG timeStart = 0;
+	ULONGLONG timeCur = GetTickCount64();
+
+	if (timeStart == 0)
+		timeStart = timeCur;
+
+	t = (timeCur - timeStart) / 1000.0f;
 
 	// Просто очищаем задний буфер
 
-	float ClearColor[4] = { 0.0f, 0.0f, 1.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
+	float ClearColor[4] = { 0.0f,0.0f, 0.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
 
 	deviceContext->ClearRenderTargetView(renderTargetView, ClearColor);
-	UINT stride = sizeof(float) * 3;
+	deviceContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	UINT stride = sizeof(float) * 7;
 	UINT offset = 0;
-	//deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 
-	// set the primitive topology
-	deviceContext->VSSetShader(vertexShader, nullptr, 0);
-	deviceContext->PSSetShader(pixelShader, nullptr, 0);
-	deviceContext->IASetInputLayout(vertexLayout);
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	glm::mat4 transate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.0, -t*10));
+	glm::mat4 trans = glm::mat4(1.0f);
+	glm::mat4 proj = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+	trans = glm::transpose(glm::rotate(trans, glm::radians(t*10), glm::vec3(0.0f, 1.0f, 0.0f)));
 
-	deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	DirectX::XMMATRIX projx = DirectX::XMMatrixPerspectiveFovLH(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+	glm::mat4 MVP = proj*transate;
 
+	for (auto i : gameObjectDraw)
+		i->draw(MVP, deviceContext);
 
-	// draw 3 vertices, starting from vertex 0
-	deviceContext->Draw(3, 0);
 
 	// Выбросить задний буфер на экран
-
 	swapChain->Present(0, 0);
 
 }
 
-char* LoadShaderFile(std::string File, int &size)
+void DirectX11Engine::initObjects()
 {
-	char* FileData = nullptr;
-
-	// open the file
-	std::ifstream VertexFile(File, std::ios::in | std::ios::binary | std::ios::ate);
-	// if open was successful
-	if (VertexFile.is_open())
-	{
-		// find the length of the file
-		int Length = (int)VertexFile.tellg();
-		size = Length;
-		FileData = new char[size];
-		// collect the file data
-		VertexFile.seekg(0, std::ios::beg);
-		VertexFile.read(FileData, Length);
-		VertexFile.close();
-	}
-
-	return FileData;
-}
-
-void DirectX11Engine::hellowTriangle()
-{
-	HRESULT hr;
-	int sizeVS;
-	int sizePS;
-	char* VSFile = LoadShaderFile("e:/Project/Develop/OpenCars/x64/Debug/simpleVertexShader.cso", sizeVS);
-	char* PSFile = LoadShaderFile("e:/Project/Develop/OpenCars/x64/Debug/simplePixelShader.cso", sizePS);
-
-	hr = device->CreateVertexShader(VSFile, sizeVS, nullptr, &vertexShader);
-	hr = device->CreatePixelShader(PSFile, sizePS, nullptr, &pixelShader);
-
-	if (FAILED(hr))
-		return;
-
-
-
-	D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	// create and set the input layout
-	hr = device->CreateInputLayout(ied, ARRAYSIZE(ied), VSFile, sizeVS, &vertexLayout);
-
-	// create a triangle out of vertices
-	glm::vec3 OurVertices[] =
-	{
-		{ 0.0f, 0.5f, 0.0f },
-	{ 0.45f, -0.5f, 0.0f },
-	{ -0.45f, -0.5f, 0.0f },
-	};
-
-	// create the vertex buffer
-	D3D11_BUFFER_DESC bd = { 0 };
-	bd.ByteWidth = sizeof(glm::vec3) * ARRAYSIZE(OurVertices);
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-	D3D11_SUBRESOURCE_DATA srd = { OurVertices, 0, 0 };
-
-	hr = device->CreateBuffer(&bd, &srd, &vertexBuffer);
-	if (FAILED(hr))
-		return ;
+	for (auto i : gameObjectDraw)
+		i->init(device);
 }
 
 HRESULT DirectX11Engine::initWindow()
@@ -252,8 +217,6 @@ void DirectX11Engine::initSwapChain()
 		&swapChain, &device, nullptr, &deviceContext);
 	// Проверяем, что операция прошла успешно
 	assert(SUCCEEDED(result));
-
-
 }
 
 void DirectX11Engine::InitRenderTargetView()
@@ -276,7 +239,7 @@ void DirectX11Engine::InitRenderTargetView()
 	backBuffer->Release();
 
 	// Используем созданный View для отрисовки
-	deviceContext->OMSetRenderTargets(1, &renderTargetView, NULL);
+	deviceContext->OMSetRenderTargets(1, &renderTargetView, g_pDepthStencilView);
 
 	// Задаем область отрисовки
 	D3D11_VIEWPORT viewport;
@@ -287,12 +250,41 @@ void DirectX11Engine::InitRenderTargetView()
 	viewport.MinDepth = 0;
 	viewport.MaxDepth = 1;
 	deviceContext->RSSetViewports(1, &viewport);
+
+	D3D11_TEXTURE2D_DESC descDepth = {};     // Структура с параметрами
+	descDepth.Width = windowWidth;            // ширина и
+	descDepth.Height = windowHeight;    // высота текстуры
+	descDepth.MipLevels = 1;            // уровень интерполяции
+	descDepth.ArraySize = 1;
+	descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // формат (размер пикселя)
+	descDepth.SampleDesc.Count = 1;
+	descDepth.SampleDesc.Quality = 0;
+	descDepth.Usage = D3D11_USAGE_DEFAULT;
+	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;         // вид - буфер глубин
+	descDepth.CPUAccessFlags = 0;
+	descDepth.MiscFlags = 0;
+	// При помощи заполненной структуры-описания создаем объект текстуры
+
+	device->CreateTexture2D(&descDepth, nullptr, &g_pDepthStencil);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};// Структура с параметрами
+	descDSV.Format = descDepth.Format;         // формат как в текстуре
+	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDSV.Texture2D.MipSlice = 0;
+	// При помощи заполненной структуры-описания и текстуры создаем объект буфера глубин
+	device->CreateDepthStencilView(g_pDepthStencil, &descDSV, &g_pDepthStencilView);
+
 }
 
 DirectX11Engine::~DirectX11Engine()
 {
 	DisposeWindows();
 	DisposeSwapChain();
+}
+
+void DirectX11Engine::addGemeObject(GameObject * gameObject)
+{
+	gameObjectDraw.push_back(gameObject);
 }
 
 void DirectX11Engine::DisposeSwapChain()

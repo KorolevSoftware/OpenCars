@@ -6,18 +6,28 @@
 #include "MyCallbackClass.h"
 #include "DirectX11Engine.h"
 #include <DirectXMath.h>
+#include "QuadSprite.h"
+
 using namespace reactphysics3d;
 int main()
 {
-
 	DirectX11Engine engine;
-	engine.createWindows(true, 800, 600);
+	engine.createWindows(true, 1920, 1080);
 	engine.init();
-	engine.hellowTriangle();
 	MSG msg = { 0 };
+
+	QuadSprite *sprite = new QuadSprite();
+	engine.addGemeObject(sprite);
+	engine.initObjects();
 
 	while (WM_QUIT != msg.message)
 	{
+		if (msg.message == WM_KEYDOWN)
+			std::cout << "down" << std::endl;
+
+		if (msg.message == WM_KEYUP)
+			std::cout << "Up" << std::endl;
+		
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -83,5 +93,4 @@ int main()
 	//	world.update(1.0 / 60.0);
 	//	std::cout << body->getTransform().getPosition().y << std::endl;
 	//}
-	return 0;
 }

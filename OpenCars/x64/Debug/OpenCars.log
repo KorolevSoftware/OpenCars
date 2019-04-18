@@ -1,6 +1,4 @@
-﻿  compilation object save succeeded; see E:\Project\Develop\OpenCars\x64\Debug\simpleVertexShader.cso
-  DirectX11Engine.cpp
-  main.cpp
+﻿  main.cpp
 e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\engine\dynamicsworld.h(387): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
 e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\engine\dynamicsworld.h(395): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
 e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\halfedgestructure.h(135): warning C4267: return: преобразование из "size_t" в "reactphysics3d::uint"; возможна потеря данных
@@ -15,5 +13,4 @@ e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\containers\set.h(50
               V=reactphysics3d::bodyindexpair
           ]
   e:\project\develop\opencars\lib\reactphysics3d-0.7.0\include\collision\collisiondetection.h(89): note: выполняется компиляция ссылки на экземпляр шаблон класс "reactphysics3d::Set<reactphysics3d::bodyindexpair>"
-  Создание кода...
   OpenCars.vcxproj -> E:\Project\Develop\OpenCars\x64\Debug\OpenCars.exe

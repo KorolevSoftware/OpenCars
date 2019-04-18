@@ -1,19 +1,28 @@
 cbuffer ConstantBuffer : register(b0)
-
 {
-
 	matrix MatWorld; // Тут могут быть любые данные, понимаете? Не обязательно матрицы.
-
-	matrix MatView;
-
-	matrix MatProjection;
-
 }
 
 
 
-float4 VS(float4 Pos : POSITION) : SV_POSITION
+struct VS_INPUT
+{
+	float4 Pos : POSITION;
+	float4 Color : COLOR;
+};
+
+struct PS_INPUT
+{
+	float4 Pos : SV_POSITION;
+	float4 Color : COLOR;
+};
+
+
+PS_INPUT VS(VS_INPUT input)
 {
 	// Оставляем координаты точки без изменений
-	return Pos;
+	PS_INPUT output = (PS_INPUT)0;
+	output.Pos = mul(input.Pos, MatWorld);
+	output.Color = input.Color;
+	return output;
 }

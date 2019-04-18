@@ -79,13 +79,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectX11Engine.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyCallbackClass.cpp" />
+    <ClCompile Include="QuadSprite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectX11Engine.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="GraphicEngine.h" />
     <ClInclude Include="MyCallbackClass.h" />
+    <ClInclude Include="QuadSprite.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +106,8 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalOptions>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
