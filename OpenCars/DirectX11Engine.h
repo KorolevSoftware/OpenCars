@@ -5,9 +5,10 @@
 #include <assert.h>
 #include <tchar.h>
 #include <d3d11.h>
-#include <gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <Windows.h>
 #include "GameObject.h"
+#include "Camera.h"
 #include <vector>
 
 
@@ -29,7 +30,7 @@ private:
 	ID3D11RenderTargetView *renderTargetView;
 	ID3D11Texture2D* g_pDepthStencil;
 	ID3D11DepthStencilView* g_pDepthStencilView;
-
+	Camera *activeCamera;
 	//GameEngine
 	std::vector<GameObject *> gameObjectDraw;
 
@@ -42,6 +43,7 @@ public:
 	void init() override;
 	void render() override;
 	void initObjects() override;
+	void setActiveCamera(Camera *cam);
 
 private:
 	HRESULT initWindow();

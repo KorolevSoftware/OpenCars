@@ -52,6 +52,7 @@ void DirectX11Engine::init()
 
 void DirectX11Engine::render()
 {
+	
 	static float t = 0.0f;
 	static ULONGLONG timeStart = 0;
 	ULONGLONG timeCur = GetTickCount64();
@@ -67,19 +68,20 @@ void DirectX11Engine::render()
 
 	deviceContext->ClearRenderTargetView(renderTargetView, ClearColor);
 	deviceContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-	UINT stride = sizeof(float) * 7;
-	UINT offset = 0;
 
-	glm::mat4 transate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.0, -t*10));
+
+	/*glm::mat4 transate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.0, -t*10));
 	glm::mat4 trans = glm::mat4(1.0f);
-	glm::mat4 proj = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
 	trans = glm::transpose(glm::rotate(trans, glm::radians(t*10), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	DirectX::XMMATRIX projx = DirectX::XMMatrixPerspectiveFovLH(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-	glm::mat4 MVP = proj*transate;
+*/
+	glm::mat4 proj = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+
+	glm::mat4 MVP = proj*activeCamera->getViewMatrix();
 
 	for (auto i : gameObjectDraw)
-		i->draw(MVP, deviceContext);
+		i->draw(proj, activeCamera->getViewMatrix(), MVP, deviceContext);
 
 
 	// Выбросить задний буфер на экран
@@ -91,6 +93,11 @@ void DirectX11Engine::initObjects()
 {
 	for (auto i : gameObjectDraw)
 		i->init(device);
+}
+
+void DirectX11Engine::setActiveCamera(Camera * cam)
+{
+	this->activeCamera = cam;
 }
 
 HRESULT DirectX11Engine::initWindow()
@@ -162,33 +169,18 @@ void DirectX11Engine::initSwapChain()
 {
 	HRESULT result;
 
-	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-	// Разрмер совпадает с размером клиентской части окна
+	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
+	swapChainDesc.BufferCount = 1;
 	swapChainDesc.BufferDesc.Width = windowWidth;
 	swapChainDesc.BufferDesc.Height = windowHeight;
-	// Ограничение количества кадров в секунду задается в виде рационального числа
-	// Т.к. нам нужна максимальная частота кадров, отключаем
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-	// Формат вывода -- 32-битный RGBA
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	// Не задаем масштабирования при выводе
-	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	// Не используем сглаживание
-	swapChainDesc.SampleDesc.Count = 8;
-	swapChainDesc.SampleDesc.Quality = D3D11_STANDARD_MULTISAMPLE_PATTERN;
-	// Используем SwapChain для вывода
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	// Один "задний" (не отображаемый) буфер
-	swapChainDesc.BufferCount = 1;
-	// Задаем окно для вывода
 	swapChainDesc.OutputWindow = hWnd;
-	// Оконный режим
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.Windowed = TRUE;
-	// Отбрасываем старую информацию из буфера при выводе на экран
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	swapChainDesc.Flags = 0;
 
 	// Используем DirectX 11.0, т.к. его нам достаточно
 	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
@@ -239,17 +231,8 @@ void DirectX11Engine::InitRenderTargetView()
 	backBuffer->Release();
 
 	// Используем созданный View для отрисовки
-	deviceContext->OMSetRenderTargets(1, &renderTargetView, g_pDepthStencilView);
 
 	// Задаем область отрисовки
-	D3D11_VIEWPORT viewport;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = (FLOAT)windowWidth;
-	viewport.Height = (FLOAT)windowHeight;
-	viewport.MinDepth = 0;
-	viewport.MaxDepth = 1;
-	deviceContext->RSSetViewports(1, &viewport);
 
 	D3D11_TEXTURE2D_DESC descDepth = {};     // Структура с параметрами
 	descDepth.Width = windowWidth;            // ширина и
@@ -265,15 +248,24 @@ void DirectX11Engine::InitRenderTargetView()
 	descDepth.MiscFlags = 0;
 	// При помощи заполненной структуры-описания создаем объект текстуры
 
-	device->CreateTexture2D(&descDepth, nullptr, &g_pDepthStencil);
+	result = device->CreateTexture2D(&descDepth, nullptr, &g_pDepthStencil);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};// Структура с параметрами
 	descDSV.Format = descDepth.Format;         // формат как в текстуре
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
 	// При помощи заполненной структуры-описания и текстуры создаем объект буфера глубин
-	device->CreateDepthStencilView(g_pDepthStencil, &descDSV, &g_pDepthStencilView);
+	result =  device->CreateDepthStencilView(g_pDepthStencil, &descDSV, &g_pDepthStencilView);
 
+	D3D11_VIEWPORT viewport;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = (FLOAT)windowWidth;
+	viewport.Height = (FLOAT)windowHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	deviceContext->RSSetViewports(1, &viewport);
+	deviceContext->OMSetRenderTargets(1, &renderTargetView, g_pDepthStencilView);
 }
 
 DirectX11Engine::~DirectX11Engine()

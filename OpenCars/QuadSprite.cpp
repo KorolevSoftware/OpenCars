@@ -77,30 +77,11 @@ void QuadSprite::init(ID3D11Device * device)
 	hr = device->CreateBuffer(&bdm, nullptr, &matrixBuffer);
 }
 
-void QuadSprite::setLocation(glm::vec3 & location)
-{
-	this->location = location;
-}
 
-void QuadSprite::setRotation(glm::vec3 & rotation)
-{
-	this->rotation = rotation;
-}
-
-void QuadSprite::setScale(glm::vec3 & scale)
-{
-	this->scale = scale;
-}
-
-glm::mat4 QuadSprite::getModelMatrix()
-{
-	return glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
-}
-
-void QuadSprite::draw(glm::mat4 &VP, ID3D11DeviceContext *deviceContext)
+void QuadSprite::draw(const glm::mat4 &P, const glm::mat4 &V, const glm::mat4 &VP, ID3D11DeviceContext *deviceContext)
 {
 	// set the primitive topology
-	glm::mat4 result = glm::transpose(VP*getModelMatrix());
+	glm::mat4 result = glm::transpose(P*glm::translate(getModelMatrix(), glm::vec3(V[3])));
 
 	deviceContext->UpdateSubresource(matrixBuffer, 0, nullptr, &result, 0, 0);
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
