@@ -27,5 +27,5 @@ rp3d::decimal MyCallbackClass::notifyRaycastHit(const rp3d::RaycastInfo& info)
 	this->normalInPoint = glm::vec3(info.worldNormal.x, info.worldNormal.y, info.worldNormal.z);
 	this->dist = info.hitFraction;// std::min(dist, info.hitFraction);
 
-	return 1.0;
+	return dist;
 }
