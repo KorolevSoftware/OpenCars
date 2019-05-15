@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by OpenCars.rc
+// Used by OpenCars1.rc
 
 // Следующие стандартные значения для новых объектов
 // 

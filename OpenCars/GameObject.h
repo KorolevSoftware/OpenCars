@@ -1,11 +1,6 @@
 #pragma once
 #include <d3d11.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/quaternion.hpp> 
-#include <glm/gtx/matrix_decompose.hpp>		
-
+#include <glm/gtx/euler_angles.hpp>	
 
 struct ConstantBuffer
 {
@@ -17,14 +12,11 @@ struct simpleVertex
 	glm::vec3 pos;
 	glm::vec4 col;
 };
+
 class GameObject
 {
 protected:
 	GameObject *parent;
-	ID3D11InputLayout*  vertexLayout;
-	ID3D11Buffer*       vertexBuffer;
-	ID3D11Buffer*       indexBuffer;
-	ID3D11Buffer*       matrixBuffer;
 	glm::vec3 location;
 	glm::vec3 rotation;
 	glm::vec3 scale;

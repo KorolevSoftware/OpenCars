@@ -3,8 +3,6 @@ cbuffer ConstantBuffer : register(b0)
 	matrix MatWorld;
 }
 
-
-
 struct VS_INPUT
 {
 	float4 Pos : POSITION;

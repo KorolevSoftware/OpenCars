@@ -43,10 +43,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\lib\glm;$(SolutionDir)\lib\reactphysics3d-0.7.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\lib\glm;d:\Temp\Temp\PhysX-4.1\physx\include;d:\Temp\Temp\PhysX-4.1\physx\source\physxextensions\src;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\include;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\contact;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\common;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\convex;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\distance;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\sweep;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\gjk;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\intersection;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\hf;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\mesh;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\pcm;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\ccd;d:\Temp\Temp\PhysX-4.1\pxshared\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\lib\glm;$(SolutionDir)\lib\reactphysics3d-0.7.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\lib\glm;d:\Temp\Temp\PhysX-4.1\physx\include;d:\Temp\Temp\PhysX-4.1\physx\source\physxextensions\src;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\include;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\contact;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\common;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\convex;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\distance;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\sweep;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\gjk;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\intersection;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\hf;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\mesh;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\pcm;d:\Temp\Temp\PhysX-4.1\physx\source\geomutils\src\ccd;d:\Temp\Temp\PhysX-4.1\pxshared\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -54,9 +54,10 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;reactphysics3d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysX_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXFoundation_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXPvdSDK_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXVehicle_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXCharacterKinematic_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXExtensions_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXCooking_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\debug\PhysXCommon_64.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\reactphysics3d-0.7.0\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>NotSet</SubSystem>
     </Link>
@@ -69,36 +70,41 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\lib\reactphysics3d-0.7.0\Release;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;reactphysics3d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysX_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXFoundation_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXPvdSDK_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXVehicle_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXCharacterKinematic_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXExtensions_static_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXCooking_64.lib;D:\Temp\Temp\PhysX-4.1\physx\bin\win.x86_64.vc141.mt\release\PhysXCommon_64.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>NotSet</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="box.cpp" />
+    <ClCompile Include="BufferDirectX.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DirectX11Engine.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyCallbackClass.cpp" />
+    <ClCompile Include="PhysicEngine.cpp" />
     <ClCompile Include="QuadSprite.cpp" />
+    <ClCompile Include="ShaderDirectX.cpp" />
+    <ClCompile Include="TraingleMeshObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="box.h" />
+    <ClInclude Include="BufferDirectX.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DirectX11Engine.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GraphicEngine.h" />
-    <ClInclude Include="MyCallbackClass.h" />
+    <ClInclude Include="PhysicEngine.h" />
     <ClInclude Include="QuadSprite.h" />
     <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="OpenCars.rc" />
+    <ClInclude Include="ShaderDirectX.h" />
+    <ClInclude Include="TraingleMeshObject.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="simplePixelShader.hlsl">

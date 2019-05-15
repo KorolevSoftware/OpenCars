@@ -1,65 +1,257 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <iostream>
-#include <reactphysics3d.h>
-#include <mathematics/Vector3.h>
-#include "MyCallbackClass.h"
+#include <ctime>
 #include "DirectX11Engine.h"
-#include <DirectXMath.h>
-#include <glm/gtc/type_ptr.hpp>
 #include "QuadSprite.h"
+#include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "box.h"
+#include "PxPhysicsAPI.h"
 
-using namespace reactphysics3d;
 
-enum Category {
-	CATEGORY1 = 0x0001,
-	CATEGORY2 = 0x0002,
-	CATEGORY3 = 0x0004
-};
+using namespace physx;
+PxPhysics *mSDK = nullptr;
+PxCooking *mCooking = nullptr;
+PxDefaultErrorCallback pDefaultErrorCallback;
+PxDefaultAllocator pDefaultAllocatorCallback;
+PxSimulationFilterShader pDefaultFilterShader = PxDefaultSimulationFilterShader;
+
+PxScene *mScene;
+
+PxRigidStatic *plane;
+PxRigidStatic *tramplin;
+PxRigidStatic *actorTriMesh;
+PxShape *shape;
+PxRigidDynamic * actor;
+
+float mStepSize = 1.0f / 1000.0f;
+
+void initPhysX();
+void initScene();
+void initActors();
+void ShowTransformations();
+void TransformPrint(PxRigidActor*);
+void releasePhysX();
+
+void initPhysX()
+{
+	PxFoundation *mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, pDefaultAllocatorCallback, pDefaultErrorCallback);
+	mSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
+	PxTolerancesScale scale;
+
+	if (!scale.isValid())
+		return;
+
+	PxCookingParams params(scale);
+	params.meshWeldTolerance = 0.001f;
+	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+
+	mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(scale));
+	PxPvd *gPvd = PxCreatePvd(*mFoundation);
+	if (!mSDK)
+	{
+		std::cerr << "An error has happened." << std::endl;
+		exit(1);
+	}
+
+	if (!PxInitExtensions(*mSDK, gPvd))
+	{
+		std::cerr << "An error has happened." << std::endl;
+		exit(1);
+	}
+}
+
+void initScene()
+{
+	PxSceneDesc sceneDesc(mSDK->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0, 0, 0);// PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.filterShader = pDefaultFilterShader;
+
+	PxDefaultCpuDispatcher *mCpuDispatcher = PxDefaultCpuDispatcherCreate(2);
+	if (!mCpuDispatcher)
+		std::cerr << "PxDefaultCpuDispatcherCreate failed!";
+	sceneDesc.cpuDispatcher = mCpuDispatcher;
+
+	mScene = mSDK->createScene(sceneDesc);
+	if (!mScene)
+		std::cerr << "createScene failed!";
+}
+void initActors()
+{
+	// Material
+	PxMaterial *mMaterial = mSDK->createMaterial(0.0f, 0.0f, 0.1f);
+	if (!mMaterial)
+		std::cerr << "createMaterial failed!";
+
+	PxReal d = 0.0f;
+	PxTransform pose = PxTransform(PxVec3(0.0f, d, 0.0f), PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+
+	// Plane
+	plane = mSDK->createRigidStatic(pose);
+	if (!plane)
+		std::cerr << "create plane failed!";
+
+	shape = PxRigidActorExt::createExclusiveShape(*plane, PxPlaneGeometry(), *mMaterial);
+	tramplin = mSDK->createRigidStatic(PxTransform(PxVec3(-3.0f, 0, 0.0f), PxQuat(0.3, 0.0, 0, 1).getNormalized()));
+	shape = PxRigidActorExt::createExclusiveShape(*tramplin, PxBoxGeometry(7, 1, 4), *mMaterial);
+
+	if (!shape)
+		std::cerr << "create shape failed!";
+
+	mScene->addActor(*plane);
+	PxReal density = 1.0f;
+	PxTransform transform = PxTransform(PxVec3(0.0f, 5.0f, 0.0f), PxQuat(0.0, 0.0, 0, 1).getNormalized());
+	PxVec3 dimensions(2.0f, 1.0f, 1.0f);
+	PxBoxGeometry geometry(dimensions);
+
+
+	actor = PxCreateDynamic(*mSDK, transform, geometry, *mMaterial, density);
+	
+	
+	mScene->addActor(*actor);
+	mScene->addActor(*tramplin);
+
+	PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = 8;
+	meshDesc.points.stride = sizeof(PxVec3);
+	meshDesc.points.data = new PxVec3[8]
+	{
+		PxVec3(1.0, -1.0, -1.0),
+		PxVec3(1.0, -1.0, 1.0),
+		PxVec3(-1.0, -1.0, 1.0),
+		PxVec3(-1.0, -1.0, -1.0),
+		PxVec3(1.0, 1.0, -1.0),
+		PxVec3(1.0, 1.0, 1.0),
+		PxVec3(-1.0, 1.0, 1.0),
+		PxVec3(-1.0, 1.0, -1.0)
+	};
+
+	meshDesc.triangles.count = 12;
+	meshDesc.triangles.stride = 3 * sizeof(int);
+	meshDesc.triangles.data = new int[36]
+	{
+		3, 0, 1,
+		5, 4, 7,
+		1, 0, 4,
+		2, 1, 5,
+		2, 6, 7,
+		7, 4, 0,
+		3, 1, 2,
+		5, 7, 6,
+		1, 4, 5,
+		2, 5, 6,
+		2, 7, 3,
+		7, 0, 3
+	};
+
+	bool ch = meshDesc.isValid();
+
+	PxDefaultMemoryOutputStream writeBuffer;
+	bool status = mCooking->cookTriangleMesh(meshDesc, writeBuffer);
+	if (!status)
+		return;
+
+	PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+
+	PxTriangleMesh* triangleMesh = mSDK->createTriangleMesh(readBuffer);
+	PxTriangleMeshGeometry meshGeom(triangleMesh);
+	actorTriMesh = mSDK->createRigidStatic(PxTransform(PxVec3(0.0f, 1.5f, 4.0f), PxQuat(0,0,0,1).getNormalized()));
+	mScene->addActor(*actorTriMesh);
+	shape = PxRigidActorExt::createExclusiveShape(*actorTriMesh, meshGeom, *mMaterial);
+
+	// Cube
+	if (!shape)
+		std::cerr << "create shape failed!";
+	if (!actor)
+		std::cerr << "create actor failed!";
+}
+
+void PhysXLoop()
+{
+	mScene->simulate(0.001);
+	mScene->fetchResults(true);	
+}
+void ShowTransformations()
+{
+	std::cout << "\tplane" << std::endl;
+	TransformPrint(shape->getActor());
+
+	std::cout << "\tcube" << std::endl;
+	PxU32 nShapes = actor->getNbShapes();
+	PxShape** shapes = new PxShape*[nShapes];
+	actor->getShapes(shapes, nShapes);
+
+
+
+	while (nShapes--)
+		TransformPrint(shapes[nShapes]->getActor());
+
+	delete[] shapes;
+}
+
+void TransformPrint(PxRigidActor *actor)
+{
+	PxTransform np = actor->getGlobalPose();
+	PxMat44 m(actor->getGlobalPose());
+
+	std::cout << "\t( " << m[0][0] << " ; " << m[0][1] << " ; " << m[0][2] << " )" << std::endl;
+
+	std::cout << "\t( " << np.p.x << " ; " << np.p.y << " ; " << np.p.z << " )" << std::endl;
+}
+void releasePhysX()
+{
+	PxCloseExtensions();
+	mScene->release();
+	mSDK->release();
+}
 
 int main(int argc, char* argv[])
 {
-	std::cout<< argv[0];
+	std::cout << argv[0];
 	// Graphich Engine
 	Camera *cam = new Camera(
 		glm::vec3(0, 10, 10),
 		glm::vec3(0, 0, 0),
 		glm::vec3(0, 1, 0));
 
+
+	// Graphic
+	//---------------------Begin-----------------------------
 	DirectX11Engine engine;
 	engine.createWindows(true, 1920, 1080);
 	engine.init();
 	engine.setActiveCamera(cam);
 
-	Box *floorG = new Box(glm::vec3(100, 0.5, 100));
-	floorG->setColor(glm::vec3(1, 0, 0));
 
-	Box *bodyG = new Box(glm::vec3(2, 1, 1));
+	initPhysX();
+	initScene();
+	initActors();
 
-	Box *sprite = new Box(glm::vec3(0.4, 0.4, 0.4));
-	sprite->setColor(glm::vec3(1, 1, 1));
 
+	Box *box = new Box(glm::vec3(2, 1, 1));
+	Box *tramplinG = new Box(glm::vec3(7, 1, 4));
+	Box *plane = new Box(glm::vec3(1000, 1, 1000));
+	Box *boxIntersect = new Box(glm::vec3(0.3, 0.3, 0.3));
 	Box *point1 = new Box(glm::vec3(0.2, 0.2, 0.2));
+	Box *triangleMesh = new Box(glm::vec3(1, 1, 1));
+	tramplinG->setColor(glm::vec3(1,0,1));
 	point1->setColor(glm::vec3(0, 1, 0));
-	point1->setParent(bodyG);
+	point1->setParent(box);
 
 	Box *point2 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point2->setColor(glm::vec3(0, 1, 0));
-	point2->setParent(bodyG);
+	point2->setParent(box);
 
 	Box *point3 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point3->setColor(glm::vec3(0, 1, 0));
-	point3->setParent(bodyG);
+	point3->setParent(box);
 
 	Box *point4 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point4->setColor(glm::vec3(0, 1, 0));
-	point4->setParent(bodyG);
+	point4->setParent(box);
 
-	point1->setLocation(glm::vec3( 2.5, 0.5,  2.5));
-	point2->setLocation(glm::vec3( 2.5, 0.5, -2.5));
-	point3->setLocation(glm::vec3(-2.5, 0.5,  2.5));
+	point1->setLocation(glm::vec3(2.5, 0.5, 2.5));
+	point2->setLocation(glm::vec3(2.5, 0.5, -2.5));
+	point3->setLocation(glm::vec3(-2.5, 0.5, 2.5));
 	point4->setLocation(glm::vec3(-2.5, 0.5, -2.5));
 
 	Box *pointIntersect1 = new Box(glm::vec3(0.2, 0.2, 0.2));
@@ -72,93 +264,48 @@ int main(int argc, char* argv[])
 	pointIntersect4->setColor(glm::vec3(0, 1, 0));
 
 
-	Box *tramplinG = new Box(glm::vec3(3, 0.5, 30));
-	tramplinG->setColor(glm::vec3(1, 1, 0));
-	//sprite->setLocation(glm::vec3(0, 1, 0));
-	bodyG->setLocation(glm::vec3(2, 0, 1));
-	bodyG->setParent(floorG);
-	engine.addGemeObject(floorG);
-	engine.addGemeObject(bodyG);
+	triangleMesh->setLocation(glm::vec3(0, 1.5, 4));
+	plane->setLocation(glm::vec3(0, -1, 0));
+	plane->setColor(glm::vec3(1, 1, 0));
+	boxIntersect->setColor(glm::vec3(0, 1, 1));
+	engine.addGemeObject(triangleMesh);
+	engine.addGemeObject(boxIntersect);
+	engine.addGemeObject(tramplinG);
+	engine.addGemeObject(box);
+	engine.addGemeObject(plane);
+	engine.addGemeObject(pointIntersect4);
+	engine.addGemeObject(pointIntersect3);
+	engine.addGemeObject(pointIntersect2);
+	engine.addGemeObject(pointIntersect1);
 	engine.addGemeObject(point1);
 	engine.addGemeObject(point2);
 	engine.addGemeObject(point3);
 	engine.addGemeObject(point4);
-	engine.addGemeObject(pointIntersect1);
-	engine.addGemeObject(pointIntersect2);
-	engine.addGemeObject(pointIntersect3);
-	engine.addGemeObject(pointIntersect4);
-	engine.addGemeObject(sprite);
-	engine.addGemeObject(tramplinG);
 	engine.initObjects();
 
-	// end
-	//// World
-	rp3d::Vector3 gravity(0, 0, 0);
-	rp3d::DynamicsWorld world(gravity);
-	world.setNbIterationsVelocitySolver(150);
-	world.setNbIterationsPositionSolver(80);
-	world.enableSleeping(false);
-
-	// body
-	rp3d::Vector3 initPosition(0.0, 5.0, 0.0);
-	rp3d::Transform transform(initPosition, rp3d::Quaternion(0,0.5,0.5,1));
-
-	rp3d::RigidBody* body;
-	body = world.createRigidBody(transform);
-	body->setType(BodyType::DYNAMIC);
-	//body->setLinearDamping(0.9);
-	//body->setAngularDamping(0.1);
-	rp3d::BoxShape shapeBody(Vector3(2, 1, 1));
-	ProxyShape* proxyShapebody;
-	proxyShapebody = body->addCollisionShape(&shapeBody, Transform::identity(), 100);
-	proxyShapebody->setCollisionCategoryBits(CATEGORY2);
-	//body->setCenterOfMassLocal(Vector3(0, -3, 0));
-	
-
-	rp3d::RigidBody* pol;
-	pol = world.createRigidBody(Transform(Vector3(0, 0, 0), Quaternion::identity() /*Quaternion(-1, 0, 0, glm::radians(30.0f))*/));
-	pol->setType(BodyType::KINEMATIC);
-	rp3d::BoxShape shapePol(Vector3(100, 0.5, 100));
-	ProxyShape* proxyShapePol;
-	proxyShapePol = pol->addCollisionShape(&shapePol, pol->getTransform(), 0);
-	proxyShapePol->setCollisionCategoryBits(CATEGORY1);
-
-	rp3d::RigidBody* tramplin;
-	tramplin = world.createRigidBody(Transform::identity());
-	tramplin->setType(BodyType::KINEMATIC);
-	rp3d::BoxShape shapetramplin(Vector3(3, 0.5, 30));
-	ProxyShape* proxyShapetramplin;
-	proxyShapetramplin = pol->addCollisionShape(&shapetramplin, Transform(Vector3(-10, 1.5, 0), Quaternion(0, 0, 1, glm::radians(10.0))), 0);
-	proxyShapetramplin->setCollisionCategoryBits(CATEGORY1);
-
-
+	actor->setLinearDamping(0.5);
+	actor->setAngularDamping(0.5);
 	MSG msg{ 0 };
-	float damping = 500;
-	float velosity = 0;
-	float force;
+   // здесь должен быть фрагмент кода, время выполнения которого нужно измерить
+	unsigned int old = 0; // конечное время
 	while (WM_QUIT != msg.message)
 	{
-		if (GetAsyncKeyState(VK_UP))
-			body->applyForceToCenterOfMass(Vector3(-1000, 0, 0));
-			//floorG->setLocation(glm::vec3(floorG->getLocation().x, 0, floorG->getLocation().z + 0.01));
-
-		if (GetAsyncKeyState(VK_DOWN))
-			body->applyForceToCenterOfMass(Vector3(1000, 0, 0));
-			//floorG->setLocation(glm::vec3(floorG->getLocation().x, 0, floorG->getLocation().z - 0.01));
+		unsigned int newt = clock();
+		float deltaTime = (float)(newt - old)/1000.0f;
+		old = newt;
 
 		if (GetAsyncKeyState(VK_RIGHT))
-			body->applyTorque(Vector3(0, -1000, 0));
-			//floorG->setLocation(glm::vec3(floorG->getLocation().x - 0.01, 0, floorG->getLocation().z));
+			actor->addTorque(PxMat44(actor->getGlobalPose()).transform(PxVec3(0, -300, 0)));
 
 		if (GetAsyncKeyState(VK_LEFT))
-			body->applyTorque(Vector3(0, 1000, 0));
-			//floorG->setLocation(glm::vec3(floorG->getLocation().x + 0.01, 0, floorG->getLocation().z));
+			actor->addTorque(PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 300, 0) ));
 
-		if (GetAsyncKeyState(VK_SPACE))
-			floorG->setRotation(glm::vec3(0, floorG->getRotation().y + 0.01, 0));
+		if (GetAsyncKeyState(VK_UP))
+			actor->addForce(PxMat44(actor->getGlobalPose()).transform(PxVec3(-1000, 0, 0)));
 
-		cam->setTarget(bodyG->getLocation());
-		cam->setLocation(glm::vec3(bodyG->getLocation().x,10,10));
+		if (GetAsyncKeyState(VK_DOWN))
+			actor->addForce(PxMat44(actor->getGlobalPose()).transform(PxVec3(1000, 0, 0)));
+
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -166,78 +313,73 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			engine.render();
+			PxU32 nShapes = actor->getNbShapes();
+			PxShape** shapes = new PxShape*[nShapes];
+			actor->getShapes(shapes, nShapes);
+
+			PxMat44 m(actor->getGlobalPose());
+			glm::mat4 matrix = glm::make_mat4(m.front());
+			box->setModelMatrix(matrix);
+
+			PxMat44 mt(tramplin->getGlobalPose());
+			tramplinG->setModelMatrix(glm::make_mat4(mt.front()));
+
+			PxMat44 mtriangl(actorTriMesh->getGlobalPose());
+			triangleMesh->setModelMatrix(glm::make_mat4(mtriangl.front()));
+
+			actor->setAngularVelocity(actor->getAngularVelocity() * (1.0 - deltaTime * 10.0));
+			actor->setLinearVelocity(actor->getLinearVelocity() * (1.0 - deltaTime * 3.0));
 
 			Box *boxArr[] = { point1, point2, point3, point4 };
 			Box *boxIntersectArr[] = { pointIntersect1, pointIntersect2, pointIntersect3, pointIntersect4 };
 
-			float heightSpring = 3.0;
+			/*std::cout
+				<<" x "<< PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 500, 0)).x
+				<<" y "<< PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 500, 0)).y
+				<<" z "<< PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 500, 0)).z
+				<<std::endl;*/
 
+			std::cout << deltaTime << std::endl;
 
-			for (int i = 0; i < 1; i++)
+			for (int i = 0; i < 4; i++)
 			{
-			
-			float dampingForce = body->getLinearVelocity().y * damping;
-			glm::vec3 pos = glm::vec3(body->getTransform().getPosition().x, body->getTransform().getPosition().y, body->getTransform().getPosition().z);
-				//glm::vec3 pos = boxArr[i]->getModelMatrix()[3];
+				glm::vec3 pos = boxArr[i]->getModelMatrix()[3];
+		
+				PxVec3 origin(pos.x, pos.y, pos.z);               // [in] Ray origin
+				PxVec3 unitDir(0, -1, 0);                // [in] Normalized ray direction
+				PxReal maxDistance = 3.0;           // [in] Raycast max distance
+				PxRaycastBuffer hit;                 // [out] Raycast results
 
-				Ray ray(Vector3(pos.x, pos.y, pos.z), Vector3( pos.x, pos.y - heightSpring,  pos.z));
-				glm::vec3 up = boxArr[i]->getModelMatrix() * glm::vec4(glm::vec3(0, 1, 0),0);
-				
-				//boxArr[i]->setLocation(glm::vec3(rpos.x, rpos.y, rpos.z));
-				MyCallbackClass cal;
-				world.raycast(ray, &cal, 1);
-
-				if (i == 1)
-					sprite->setLocation(pos);
-
-				if (cal.isHit())
-					boxIntersectArr[i]->setLocation(cal.getIntersectPoint());
+				// Raycast against all static & dynamic objects (no filtering)
+				// The main result from this call is the closest hit, stored in the 'hit.block' structure
+				bool status = mScene->raycast(origin, PxMat44(actor->getGlobalPose()).rotate(unitDir).getNormalized(), maxDistance, hit);
+				if (status)
+				{
+					PxRigidBodyExt::addForceAtPos(*actor, PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 100 * (1.0 - (hit.block.position.y / 3.0)), 0)), origin);
+					boxIntersectArr[i]->setLocation(glm::vec3(hit.block.position.x, hit.block.position.y, hit.block.position.z));
+				}
 				else
-					boxIntersectArr[i]->setLocation(glm::vec3(pos.x, pos.y - heightSpring, pos.z));
-
-				if (cal.isHit())
 				{
-					float springForceY =700* (heightSpring - cal.dist);
-					float force = springForceY;
-					body->applyForceToCenterOfMass(Vector3(0, force, 0));// *force, Vector3(pos.x, pos.y, pos.z));
-
+					if(actor->getGlobalPose().p.y > pos.y)
+						PxRigidBodyExt::addForceAtPos(*actor, PxVec3(0, 100, 0), origin);
+					else
+						PxRigidBodyExt::addForceAtPos(*actor, PxVec3(0, -100, 0), origin);
 				}
-				else if (!cal.isHit())
-				{
-					force = -400;
-					body->applyForceToCenterOfMass(Vector3(0, force, 0));
-				}
-
-				float factor = 100;
-				Vector3 angularVelocity =  body->getAngularVelocity();
-				std::cout << body->getTransform().getOrientation().y << std::endl;
-				//body->applyTorque(-angularVelocity * factor);
-
-				Vector3 linearVelocity = body->getLinearVelocity();
-				//std::cout << linearVelocity.to_string() << std::endl;
-				body->applyForceToCenterOfMass(-linearVelocity * factor);
-
-
 			}
-			world.update(1.0 / 1000);
-			float *omFloor = new float[16];
-			proxyShapePol->getLocalToWorldTransform().getOpenGLMatrix(omFloor);
-			glm::mat4 *mFloor = reinterpret_cast<glm::mat4*>(omFloor);
-			floorG->setModelMatrix(*mFloor);
+			PhysXLoop();
 
-			float *ombody = new float[16];
-			body->getTransform().getOpenGLMatrix(ombody);
-			glm::mat4 mbody = glm::make_mat4(ombody);
-			bodyG->setModelMatrix(mbody);
+			PxVec3 carPos = actor->getGlobalPose().p;
+			PxVec3 camOffset = PxMat44(actor->getGlobalPose()).transform(PxVec3(10, 0, 0));
+			cam->setTarget(glm::vec3(carPos.x, carPos.y, carPos.z));
+			cam->setLocation(glm::vec3(camOffset.x, 7, camOffset.z));
+			
 
-			float *omTramplin = new float[16];
-			proxyShapetramplin->getLocalToWorldTransform().getOpenGLMatrix(omTramplin);
-			glm::mat4 mTramplin = glm::make_mat4(omTramplin);
-			tramplinG->setModelMatrix(mTramplin);
-
-
+			engine.render();
 		}
 	}
+	std::cout << "\nLooping ended" << std::endl;
+
+	releasePhysX();
+	std::cout << "Closed" << std::endl;
 	return 0;
 }
