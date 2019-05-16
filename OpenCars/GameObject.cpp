@@ -65,6 +65,11 @@ glm::mat4 GameObject::getModelMatrix()
 	return parent->getModelMatrix()*m;
 }
 
+glm::vec3 GameObject::getForward()
+{
+	return getModelMatrix() * glm::vec4(this->forward, 0);
+}
+
 GameObject::~GameObject()
 {
 	if (parent)

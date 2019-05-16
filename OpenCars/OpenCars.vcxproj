@@ -90,8 +90,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicEngine.cpp" />
     <ClCompile Include="QuadSprite.cpp" />
+    <ClCompile Include="RigidBodyDynamic.cpp" />
+    <ClCompile Include="RigidBodyStatic.cpp" />
     <ClCompile Include="ShaderDirectX.cpp" />
-    <ClCompile Include="TraingleMeshObject.cpp" />
+    <ClCompile Include="TriangleMeshObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="box.h" />
@@ -103,8 +105,10 @@
     <ClInclude Include="PhysicEngine.h" />
     <ClInclude Include="QuadSprite.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RigidBodyDynamic.h" />
+    <ClInclude Include="RigidBodyStatic.h" />
     <ClInclude Include="ShaderDirectX.h" />
-    <ClInclude Include="TraingleMeshObject.h" />
+    <ClInclude Include="TriangleMeshObject.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="simplePixelShader.hlsl">

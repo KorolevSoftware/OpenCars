@@ -5,6 +5,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
 #include "box.h"
+#include "TriangleMeshObject.h"
+
 #include "PxPhysicsAPI.h"
 
 
@@ -20,7 +22,6 @@ PxScene *mScene;
 PxRigidStatic *plane;
 PxRigidStatic *tramplin;
 PxRigidStatic *actorTriMesh;
-PxShape *shape;
 PxRigidDynamic * actor;
 
 float mStepSize = 1.0f / 1000.0f;
@@ -28,9 +29,6 @@ float mStepSize = 1.0f / 1000.0f;
 void initPhysX();
 void initScene();
 void initActors();
-void ShowTransformations();
-void TransformPrint(PxRigidActor*);
-void releasePhysX();
 
 void initPhysX()
 {
@@ -77,6 +75,7 @@ void initScene()
 }
 void initActors()
 {
+	PxShape *shape;
 	// Material
 	PxMaterial *mMaterial = mSDK->createMaterial(0.0f, 0.0f, 0.1f);
 	if (!mMaterial)
@@ -87,17 +86,18 @@ void initActors()
 
 	// Plane
 	plane = mSDK->createRigidStatic(pose);
+	mScene->addActor(*plane);
 	if (!plane)
 		std::cerr << "create plane failed!";
 
 	shape = PxRigidActorExt::createExclusiveShape(*plane, PxPlaneGeometry(), *mMaterial);
-	tramplin = mSDK->createRigidStatic(PxTransform(PxVec3(-3.0f, 0, 0.0f), PxQuat(0.3, 0.0, 0, 1).getNormalized()));
+	tramplin = mSDK->createRigidStatic(PxTransform(PxVec3(-3.0f, 0, 0.0f), PxQuat(0.3f, 0, 0, 1).getNormalized()));
 	shape = PxRigidActorExt::createExclusiveShape(*tramplin, PxBoxGeometry(7, 1, 4), *mMaterial);
 
 	if (!shape)
 		std::cerr << "create shape failed!";
 
-	mScene->addActor(*plane);
+	//mScene->addActor(*plane);
 	PxReal density = 1.0f;
 	PxTransform transform = PxTransform(PxVec3(0.0f, 5.0f, 0.0f), PxQuat(0.0, 0.0, 0, 1).getNormalized());
 	PxVec3 dimensions(2.0f, 1.0f, 1.0f);
@@ -105,8 +105,8 @@ void initActors()
 
 
 	actor = PxCreateDynamic(*mSDK, transform, geometry, *mMaterial, density);
-	
-	
+
+
 	mScene->addActor(*actor);
 	mScene->addActor(*tramplin);
 
@@ -154,54 +154,58 @@ void initActors()
 
 	PxTriangleMesh* triangleMesh = mSDK->createTriangleMesh(readBuffer);
 	PxTriangleMeshGeometry meshGeom(triangleMesh);
-	actorTriMesh = mSDK->createRigidStatic(PxTransform(PxVec3(0.0f, 1.5f, 4.0f), PxQuat(0,0,0,1).getNormalized()));
+	actorTriMesh = mSDK->createRigidStatic(PxTransform(PxVec3(0.0f, 1.5f, 4.0f), PxQuat(0, 0, 0, 1).getNormalized()));
 	mScene->addActor(*actorTriMesh);
 	shape = PxRigidActorExt::createExclusiveShape(*actorTriMesh, meshGeom, *mMaterial);
 
 	// Cube
 	if (!shape)
 		std::cerr << "create shape failed!";
+
 	if (!actor)
 		std::cerr << "create actor failed!";
 }
-
+float deltaTime;
 void PhysXLoop()
 {
+	//mScene->simulate(1.0f / 120.0f);
+	//mScene->fetchResults(true);
+
+	//mScene->simulate(1.0f / 120.0f);
+	//mScene->fetchResults(true);
+
 	mScene->simulate(0.001);
-	mScene->fetchResults(true);	
-}
-void ShowTransformations()
-{
-	std::cout << "\tplane" << std::endl;
-	TransformPrint(shape->getActor());
 
-	std::cout << "\tcube" << std::endl;
-	PxU32 nShapes = actor->getNbShapes();
-	PxShape** shapes = new PxShape*[nShapes];
-	actor->getShapes(shapes, nShapes);
-
-
-
-	while (nShapes--)
-		TransformPrint(shapes[nShapes]->getActor());
-
-	delete[] shapes;
+	mScene->fetchResults(true);
 }
 
-void TransformPrint(PxRigidActor *actor)
-{
-	PxTransform np = actor->getGlobalPose();
-	PxMat44 m(actor->getGlobalPose());
 
-	std::cout << "\t( " << m[0][0] << " ; " << m[0][1] << " ; " << m[0][2] << " )" << std::endl;
-
-	std::cout << "\t( " << np.p.x << " ; " << np.p.y << " ; " << np.p.z << " )" << std::endl;
-}
-void releasePhysX()
+void loadModel(std::vector<float> &rawData) 
 {
-	PxCloseExtensions();
-	mScene->release();
-	mSDK->release();
+	std::ifstream steam("e:/Project/Develop/OpenCars/Models/tracks/trackTest.raw");
+	if (steam.is_open())
+	{
+		float x1, y1, z1;
+		float x2, y2, z2;
+		float x3, y3, z3;
+		std::string s;
+		while (getline(steam, s))
+		{
+			sscanf_s(s.c_str(), "%f %f %f %f %f %f %f %f %f", &x1, &y1, &z1, &x2, &y2, &z2, &x3, &y3, &z3);
+			rawData.push_back(x1);
+			rawData.push_back(y1);
+			rawData.push_back(z1);
+
+			rawData.push_back(x2);
+			rawData.push_back(y2);
+			rawData.push_back(z2);
+
+			rawData.push_back(x3);
+			rawData.push_back(y3);
+			rawData.push_back(z3);
+		}
+	}
+
 }
 
 int main(int argc, char* argv[])
@@ -233,7 +237,7 @@ int main(int argc, char* argv[])
 	Box *boxIntersect = new Box(glm::vec3(0.3, 0.3, 0.3));
 	Box *point1 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	Box *triangleMesh = new Box(glm::vec3(1, 1, 1));
-	tramplinG->setColor(glm::vec3(1,0,1));
+	tramplinG->setColor(glm::vec3(1, 0, 1));
 	point1->setColor(glm::vec3(0, 1, 0));
 	point1->setParent(box);
 
@@ -264,15 +268,23 @@ int main(int argc, char* argv[])
 	pointIntersect4->setColor(glm::vec3(0, 1, 0));
 
 
+	std::vector<float> rawVertex;
+	loadModel(rawVertex);
+
+	TriangleMeshObject *triMeshObject = new TriangleMeshObject(rawVertex);
+	triMeshObject->setColor(glm::vec3(1, 0.5, 1));
+
+
 	triangleMesh->setLocation(glm::vec3(0, 1.5, 4));
 	plane->setLocation(glm::vec3(0, -1, 0));
 	plane->setColor(glm::vec3(1, 1, 0));
 	boxIntersect->setColor(glm::vec3(0, 1, 1));
 	engine.addGemeObject(triangleMesh);
 	engine.addGemeObject(boxIntersect);
-	engine.addGemeObject(tramplinG);
+	//engine.addGemeObject(tramplinG);
 	engine.addGemeObject(box);
-	engine.addGemeObject(plane);
+	engine.addGemeObject(triMeshObject);
+	//engine.addGemeObject(plane);
 	engine.addGemeObject(pointIntersect4);
 	engine.addGemeObject(pointIntersect3);
 	engine.addGemeObject(pointIntersect2);
@@ -283,28 +295,15 @@ int main(int argc, char* argv[])
 	engine.addGemeObject(point4);
 	engine.initObjects();
 
-	actor->setLinearDamping(0.5);
-	actor->setAngularDamping(0.5);
+	//actor->setLinearDamping(0.5);
+	//actor->setAngularDamping(0.5);
 	MSG msg{ 0 };
-   // здесь должен быть фрагмент кода, время выполнения которого нужно измерить
+	// здесь должен быть фрагмент кода, время выполнения которого нужно измерить
 	unsigned int old = 0; // конечное время
+
+
 	while (WM_QUIT != msg.message)
 	{
-		unsigned int newt = clock();
-		float deltaTime = (float)(newt - old)/1000.0f;
-		old = newt;
-
-		if (GetAsyncKeyState(VK_RIGHT))
-			actor->addTorque(PxMat44(actor->getGlobalPose()).transform(PxVec3(0, -300, 0)));
-
-		if (GetAsyncKeyState(VK_LEFT))
-			actor->addTorque(PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 300, 0) ));
-
-		if (GetAsyncKeyState(VK_UP))
-			actor->addForce(PxMat44(actor->getGlobalPose()).transform(PxVec3(-1000, 0, 0)));
-
-		if (GetAsyncKeyState(VK_DOWN))
-			actor->addForce(PxMat44(actor->getGlobalPose()).transform(PxVec3(1000, 0, 0)));
 
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -313,9 +312,23 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			PxU32 nShapes = actor->getNbShapes();
-			PxShape** shapes = new PxShape*[nShapes];
-			actor->getShapes(shapes, nShapes);
+
+			unsigned int newt = clock();
+			deltaTime = (float)(newt - old) / 1000.0f;
+			old = newt;
+
+			if (GetAsyncKeyState(VK_RIGHT))
+				actor->addTorque(PxMat44(actor->getGlobalPose()).transform(PxVec3(0, -300, 0)));
+
+			if (GetAsyncKeyState(VK_LEFT))
+				actor->addTorque(PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 300, 0)));
+
+			if (GetAsyncKeyState(VK_UP))
+				actor->addForce(PxMat44(actor->getGlobalPose()).transform(PxVec3(-1000, 0, 0)));
+
+			if (GetAsyncKeyState(VK_DOWN))
+				actor->addForce(PxMat44(actor->getGlobalPose()).transform(PxVec3(1000, 0, 0)));
+
 
 			PxMat44 m(actor->getGlobalPose());
 			glm::mat4 matrix = glm::make_mat4(m.front());
@@ -327,24 +340,18 @@ int main(int argc, char* argv[])
 			PxMat44 mtriangl(actorTriMesh->getGlobalPose());
 			triangleMesh->setModelMatrix(glm::make_mat4(mtriangl.front()));
 
-			actor->setAngularVelocity(actor->getAngularVelocity() * (1.0 - deltaTime * 10.0));
-			actor->setLinearVelocity(actor->getLinearVelocity() * (1.0 - deltaTime * 3.0));
+			actor->setAngularVelocity(actor->getAngularVelocity() * (1.0f - deltaTime * 10.0f));
+			actor->setLinearVelocity(actor->getLinearVelocity() * (1.0f- deltaTime * 3.0f));
 
 			Box *boxArr[] = { point1, point2, point3, point4 };
 			Box *boxIntersectArr[] = { pointIntersect1, pointIntersect2, pointIntersect3, pointIntersect4 };
-
-			/*std::cout
-				<<" x "<< PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 500, 0)).x
-				<<" y "<< PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 500, 0)).y
-				<<" z "<< PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 500, 0)).z
-				<<std::endl;*/
 
 			std::cout << deltaTime << std::endl;
 
 			for (int i = 0; i < 4; i++)
 			{
 				glm::vec3 pos = boxArr[i]->getModelMatrix()[3];
-		
+
 				PxVec3 origin(pos.x, pos.y, pos.z);               // [in] Ray origin
 				PxVec3 unitDir(0, -1, 0);                // [in] Normalized ray direction
 				PxReal maxDistance = 3.0;           // [in] Raycast max distance
@@ -355,31 +362,29 @@ int main(int argc, char* argv[])
 				bool status = mScene->raycast(origin, PxMat44(actor->getGlobalPose()).rotate(unitDir).getNormalized(), maxDistance, hit);
 				if (status)
 				{
-					PxRigidBodyExt::addForceAtPos(*actor, PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 100 * (1.0 - (hit.block.position.y / 3.0)), 0)), origin);
+					PxRigidBodyExt::addForceAtPos(*actor, PxMat44(actor->getGlobalPose()).transform(PxVec3(0, 100 * (1.0f - (hit.block.position.y / 3.0f)), 0)), origin);
 					boxIntersectArr[i]->setLocation(glm::vec3(hit.block.position.x, hit.block.position.y, hit.block.position.z));
 				}
 				else
 				{
-					if(actor->getGlobalPose().p.y > pos.y)
+					if (actor->getGlobalPose().p.y > pos.y)
 						PxRigidBodyExt::addForceAtPos(*actor, PxVec3(0, 100, 0), origin);
 					else
 						PxRigidBodyExt::addForceAtPos(*actor, PxVec3(0, -100, 0), origin);
 				}
 			}
-			PhysXLoop();
 
 			PxVec3 carPos = actor->getGlobalPose().p;
 			PxVec3 camOffset = PxMat44(actor->getGlobalPose()).transform(PxVec3(10, 0, 0));
 			cam->setTarget(glm::vec3(carPos.x, carPos.y, carPos.z));
 			cam->setLocation(glm::vec3(camOffset.x, 7, camOffset.z));
-			
 
+			PhysXLoop();
 			engine.render();
+			//}
 		}
 	}
 	std::cout << "\nLooping ended" << std::endl;
-
-	releasePhysX();
 	std::cout << "Closed" << std::endl;
 	return 0;
 }

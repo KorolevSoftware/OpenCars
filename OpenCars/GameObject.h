@@ -17,6 +17,7 @@ class GameObject
 {
 protected:
 	GameObject *parent;
+	glm::vec3 forward;
 	glm::vec3 location;
 	glm::vec3 rotation;
 	glm::vec3 scale;
@@ -30,6 +31,7 @@ public:
 	virtual void setParent(GameObject *parent);
 	virtual GameObject* getParent();
 	virtual glm::mat4 getModelMatrix();
+	virtual glm::vec3 getForward();
 	virtual glm::vec3 getLocation();
 	virtual glm::vec3 getRotation();
 	virtual glm::vec3 getScale();

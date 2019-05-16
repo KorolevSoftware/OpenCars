@@ -29,9 +29,6 @@
     <ClCompile Include="box.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="TraingleMeshObject.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderDirectX.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -39,6 +36,15 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="PhysicEngine.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidBodyDynamic.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="TriangleMeshObject.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidBodyStatic.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -61,9 +67,6 @@
     <ClInclude Include="box.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="TraingleMeshObject.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="ShaderDirectX.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
@@ -74,6 +77,15 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="PhysicEngine.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="RigidBodyDynamic.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleMeshObject.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="RigidBodyStatic.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,8 +5,6 @@ Box::Box() { extent = glm::vec3(1.0f); color = glm::vec3(0, 0, 1); }
 void Box::init(ID3D11Device *device)
 {
 	shader = new ShaderDirectX(device);
-	HRESULT hr;
-	// create a triangle out of vertices	
 
 	int indexes[] = {
 		0, 2, 1,

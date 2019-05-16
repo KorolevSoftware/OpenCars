@@ -1,7 +1,4 @@
-﻿  main.cpp
-e:\project\develop\opencars\opencars\main.cpp(94): warning C4305: аргумент: усечение из "double" в "float"
-e:\project\develop\opencars\opencars\main.cpp(172): warning C4305: аргумент: усечение из "double" в "physx::PxReal"
-e:\project\develop\opencars\opencars\main.cpp(335): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
-e:\project\develop\opencars\opencars\main.cpp(336): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
-e:\project\develop\opencars\opencars\main.cpp(363): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
+﻿  PhysicEngine.cpp
+  RigidBodyDynamic.cpp
+  Создание кода...
   OpenCars.vcxproj -> E:\Project\Develop\OpenCars\x64\Debug\OpenCars.exe
