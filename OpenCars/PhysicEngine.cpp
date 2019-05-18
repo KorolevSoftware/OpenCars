@@ -4,13 +4,12 @@
 PhysicEngine::PhysicEngine()
 {
 	PxFoundation *mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, pDefaultAllocatorCallback, pDefaultErrorCallback);
-	mSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
 	PxTolerancesScale scale;
-
 	if (!scale.isValid())
 		return;
 
 	PxCookingParams params(scale);
+	mSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, scale, true);
 	params.meshWeldTolerance = 0.001f;
 	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
 
@@ -27,6 +26,7 @@ PhysicEngine::PhysicEngine()
 		std::cerr << "An error has happened." << std::endl;
 		exit(1);
 	}
+	initScene();
 }
 
 RigidBodyDynamic *PhysicEngine::createRigidBodyDynamic()
@@ -40,7 +40,7 @@ RigidBodyDynamic *PhysicEngine::createRigidBodyDynamic()
 
 RigidBodyStatic * PhysicEngine::createRigidBodyStatic()
 {
-	PxTransform pose = PxTransform(PxVec3(0.0f, 0.0f, 0.0f), PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+	PxTransform pose = PxTransform(PxVec3(0.0f, 0.0f, 0.0f), PxQuat(0.0f, 0.0f, 0.0f, 1.0f));
 	// Plane
 	PxRigidStatic *body = mSDK->createRigidStatic(pose);
 	mScene->addActor(*body);
@@ -49,8 +49,12 @@ RigidBodyStatic * PhysicEngine::createRigidBodyStatic()
 
 void PhysicEngine::simulate(float time)
 {
-	mScene->simulate(time);
-	mScene->fetchResults(true);
+	if (time < 0.0001f)
+		time = 0.001f;
+
+		mScene->simulate(time);
+		mScene->fetchResults(true);
+
 }
 
 bool PhysicEngine::raycast(glm::vec3 origin, glm::vec3 direction, float maxDistance, PxRaycastBuffer &hit)

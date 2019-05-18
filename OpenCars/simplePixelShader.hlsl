@@ -1,15 +1,15 @@
+Texture2D shaderTexture : register(t0);
+SamplerState SampleType : register(s0);
+
 struct PS_INPUT
 {
 	float4 Pos : SV_POSITION;
-	float4 Color : COLOR0;
-	float4 posWorld : COLOR1;
+	float2 tex : TEXCOORD0;
 };
-
-
 
 float3 tri(float3 x)
 {
-	return 1.0-abs(2.0*frac(x / 2.0) - 1.0);
+	return 1.0 - abs(2.0*frac(x / 2.0) - 1.0);
 }
 
 float checkersTextureGrad(float3 p, float scale, float3 ddxx, float3 ddyy)
@@ -37,14 +37,14 @@ float xorTextureGradBox(float3 pos, float scale, float3 ddx, float3 ddy)
 
 float checkersTexture(float3 p, float scale)
 {
-	float3 q = floor((p+float3(0.001,0.001,0.001))*scale);
+	float3 q = floor((p + float3(0.001, 0.001, 0.001))*scale);
 	return abs(fmod(q.x + q.y + q.z, 2.0));
 }
 
 float4 PS(PS_INPUT input) : SV_Target
 {
-	//float ch = checkerboard(input.posWorld.xz, 2.0f);
-	//float ch = checkersTexture(input.posWorld, 1.0f);
-	float ch = checkersTextureGrad(input.posWorld, 2.0f,ddx(input.posWorld), ddy(input.posWorld));
-	return  float4(input.Color.rgb*ch , 1.0f);
+	float4 textureColor;
+	// Sample the pixel color from the texture using the sampler at this texture coordinate location.
+	textureColor = shaderTexture.Sample(SampleType, input.tex);
+	return textureColor;
 }

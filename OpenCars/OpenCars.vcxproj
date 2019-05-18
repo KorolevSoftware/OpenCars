@@ -87,12 +87,14 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DirectX11Engine.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicEngine.cpp" />
     <ClCompile Include="QuadSprite.cpp" />
     <ClCompile Include="RigidBodyDynamic.cpp" />
     <ClCompile Include="RigidBodyStatic.cpp" />
     <ClCompile Include="ShaderDirectX.cpp" />
+    <ClCompile Include="TextureDirectX.cpp" />
     <ClCompile Include="TriangleMeshObject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -102,12 +104,14 @@
     <ClInclude Include="DirectX11Engine.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GraphicEngine.h" />
+    <ClInclude Include="lodepng.h" />
     <ClInclude Include="PhysicEngine.h" />
     <ClInclude Include="QuadSprite.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RigidBodyDynamic.h" />
     <ClInclude Include="RigidBodyStatic.h" />
     <ClInclude Include="ShaderDirectX.h" />
+    <ClInclude Include="TextureDirectX.h" />
     <ClInclude Include="TriangleMeshObject.h" />
   </ItemGroup>
   <ItemGroup>

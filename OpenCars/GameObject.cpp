@@ -4,6 +4,8 @@ GameObject::GameObject()
 {
 	this->location = glm::vec3(0, 0, 0);
 	this->rotation = glm::vec3(0, 0, 0);
+	this->forward = glm::vec3(1, 0, 0);
+	this->up = glm::vec3(0, 1, 0);
 
 	parent = nullptr;
 }
@@ -67,7 +69,12 @@ glm::mat4 GameObject::getModelMatrix()
 
 glm::vec3 GameObject::getForward()
 {
-	return getModelMatrix() * glm::vec4(this->forward, 0);
+	return glm::normalize(getModelMatrix() * glm::vec4(glm::vec3(1, 0, 0), 0));
+}
+
+glm::vec3 GameObject::getUp()
+{
+	return glm::normalize(getModelMatrix() * glm::vec4(this->up, 0));
 }
 
 GameObject::~GameObject()

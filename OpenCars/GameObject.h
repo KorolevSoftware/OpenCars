@@ -10,7 +10,7 @@ struct ConstantBuffer
 struct simpleVertex
 {
 	glm::vec3 pos;
-	glm::vec4 col;
+	glm::vec2 uv;
 };
 
 class GameObject
@@ -18,6 +18,7 @@ class GameObject
 protected:
 	GameObject *parent;
 	glm::vec3 forward;
+	glm::vec3 up;
 	glm::vec3 location;
 	glm::vec3 rotation;
 	glm::vec3 scale;
@@ -32,6 +33,7 @@ public:
 	virtual GameObject* getParent();
 	virtual glm::mat4 getModelMatrix();
 	virtual glm::vec3 getForward();
+	virtual glm::vec3 getUp();
 	virtual glm::vec3 getLocation();
 	virtual glm::vec3 getRotation();
 	virtual glm::vec3 getScale();

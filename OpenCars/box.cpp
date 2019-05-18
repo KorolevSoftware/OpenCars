@@ -4,7 +4,6 @@ Box::Box() { extent = glm::vec3(1.0f); color = glm::vec3(0, 0, 1); }
 
 void Box::init(ID3D11Device *device)
 {
-	shader = new ShaderDirectX(device);
 
 	int indexes[] = {
 		0, 2, 1,
@@ -22,15 +21,15 @@ void Box::init(ID3D11Device *device)
 	};
 
 	simpleVertex OurVertices[] = {
-		{ glm::vec3(-extent.x , -extent.y,  extent.z), glm::vec4(color, 1.0f) },
-		{ glm::vec3(-extent.x ,  extent.y,  extent.z), glm::vec4(color, 1.0f) },
-		{ glm::vec3(-extent.x , -extent.y, -extent.z), glm::vec4(color, 1.0f) },
-		{ glm::vec3(-extent.x ,  extent.y, -extent.z), glm::vec4(color, 1.0f) },
+		{ glm::vec3(-extent.x , -extent.y,  extent.z), glm::vec2(0.0f, 1.0f) },
+		{ glm::vec3(-extent.x ,  extent.y,  extent.z), glm::vec2(0.0f, 1.0f) },
+		{ glm::vec3(-extent.x , -extent.y, -extent.z), glm::vec2(0.0f, 1.0f) },
+		{ glm::vec3(-extent.x ,  extent.y, -extent.z), glm::vec2(0.0f, 1.0f) },
 
-		{ glm::vec3(extent.x, -extent.y,  extent.z),  glm::vec4(color, 1.0f) },
-		{ glm::vec3(extent.x,  extent.y,   extent.z), glm::vec4(color, 1.0f) },
-		{ glm::vec3(extent.x, -extent.y, -extent.z), glm::vec4(color, 1.0f) },
-		{ glm::vec3(extent.x,  extent.y,  -extent.z), glm::vec4(color, 1.0f) }
+		{ glm::vec3(extent.x, -extent.y,  extent.z),  glm::vec2(0.0f, 1.0f) },
+		{ glm::vec3(extent.x,  extent.y,   extent.z), glm::vec2(0.0f, 1.0f) },
+		{ glm::vec3(extent.x, -extent.y, -extent.z), glm::vec2(0.0f, 1.0f) },
+		{ glm::vec3(extent.x,  extent.y,  -extent.z), glm::vec2(0.0f, 1.0f) }
 	};
 
 
@@ -47,6 +46,11 @@ void Box::init(ID3D11Device *device)
 void Box::setColor(const glm::vec3 & color)
 {
 	this->color = color;
+}
+
+void Box::setShader(ShaderDirectX * shader)
+{
+	this->shader = shader;
 }
 
 void Box::draw(const glm::mat4 &P, const glm::mat4 &V, const glm::mat4 &VP, ID3D11DeviceContext *deviceContext)

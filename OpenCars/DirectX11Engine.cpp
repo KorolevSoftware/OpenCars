@@ -64,7 +64,7 @@ void DirectX11Engine::render()
 
 	// Просто очищаем задний буфер
 
-	float ClearColor[4] = { 0.0f,0.0f, 0.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
+	float ClearColor[4] = { 0.0f, 1.0f, 1.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
 
 	deviceContext->ClearRenderTargetView(renderTargetView, ClearColor);
 	deviceContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -76,7 +76,7 @@ void DirectX11Engine::render()
 
 	DirectX::XMMATRIX projx = DirectX::XMMatrixPerspectiveFovLH(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 */
-	glm::mat4 proj = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 100.0f);
+	glm::mat4 proj = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 1000.0f);
 
 	glm::mat4 MVP = proj*activeCamera->getViewMatrix();
 

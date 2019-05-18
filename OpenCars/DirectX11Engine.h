@@ -37,6 +37,7 @@ private:
 public:
 	DirectX11Engine();
 	~DirectX11Engine();
+	ID3D11Device *getDevice() { return device; };
 	void addGemeObject(GameObject * gameObject);
 	void createWindows(bool fullScreen, int width, int height) override;
 	void DisposeWindows();
