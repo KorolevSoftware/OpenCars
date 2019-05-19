@@ -1,13 +1,12 @@
 #include "ShaderDirectX.h"
 
-
+extern std::string pdir;
 
 char * ShaderDirectX::LoadShaderFile(std::string File, int &size)
 {
 	char* FileData = nullptr;
-
 	// open the file
-	std::ifstream VertexFile(File, std::ios::in | std::ios::binary | std::ios::ate);
+	std::ifstream VertexFile(pdir +"/"+ File, std::ios::in | std::ios::binary | std::ios::ate);
 	// if open was successful
 	if (VertexFile.is_open())
 	{
@@ -30,8 +29,8 @@ ShaderDirectX::ShaderDirectX(ID3D11Device *device)
 	HRESULT hr;
 	int sizeVS;
 	int sizePS;
-	char* VSFile = LoadShaderFile("e:/Project/Develop/OpenCars/x64/Debug/simpleVertexShader.cso", sizeVS);
-	char* PSFile = LoadShaderFile("e:/Project/Develop/OpenCars/x64/Debug/simplePixelShader.cso", sizePS);
+	char* VSFile = LoadShaderFile("simpleVertexShader.cso", sizeVS);
+	char* PSFile = LoadShaderFile("simplePixelShader.cso", sizePS);
 	hr = device->CreateVertexShader(VSFile, sizeVS, nullptr, &vertexShader);
 	hr = device->CreatePixelShader(PSFile, sizePS, nullptr, &pixelShader);
 
@@ -55,9 +54,15 @@ ShaderDirectX::ShaderDirectX(ID3D11Device *device)
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	hr = device->CreateSamplerState(&sampDesc, &samplerLinear);
 
-	texture = new TextureDirectX(device);
-	texture->loadFormFile("e:/Project/Real Time Render/Real_Time_Render_v2/textur/New_Graph_basecolor.png");
+	
 }
+
+void ShaderDirectX::loadTexture(std::string path)
+{
+	texture = new TextureDirectX(device);
+	texture->loadFormFile(pdir + "/" + path);
+}
+
 
 void ShaderDirectX::set(ID3D11DeviceContext *deviceContext)
 {

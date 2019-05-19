@@ -14,12 +14,15 @@
 
 
 
+
 float deltaTime;
+std::string pdir;
 
-
-void loadModel(std::vector<float> &rawVertex, std::vector<float> &rawNormal, std::vector<float> &rawUV)
+void loadModel(std::string file, std::vector<float> &rawVertex, std::vector<float> &rawNormal, std::vector<float> &rawUV)
 {
-
+	rawVertex.clear();
+	rawNormal.clear();
+	rawUV.clear();
 	std::vector<float> tempVertex;
 	std::vector<float> tempNormal;
 	std::vector<float> tempuv;
@@ -34,7 +37,7 @@ void loadModel(std::vector<float> &rawVertex, std::vector<float> &rawNormal, std
 			forBuffer.push_back(pVertex[2]);
 	};
 
-	std::ifstream steam("e:/Project/Develop/OpenCars/Models/tracks/TestTrack.obj");
+	std::ifstream steam(pdir +"/" + file);
 	if (!steam.is_open())
 		return;
 	float x, y, z;
@@ -81,7 +84,11 @@ void loadModel(std::vector<float> &rawVertex, std::vector<float> &rawNormal, std
 
 int main(int argc, char* argv[])
 {
-
+	const size_t last_slash_idx = std::string(argv[0]).rfind('\\');
+	if (std::string::npos != last_slash_idx)
+	{
+		pdir = std::string(argv[0]).substr(0, last_slash_idx);
+	}
 	std::cout << argv[0];
 	// Graphich Engine
 	Camera *cam = new Camera(
@@ -95,7 +102,7 @@ int main(int argc, char* argv[])
 	RigidBodyDynamic *carBody = pEngine.createRigidBodyDynamic();
 	carBody->setLocation(glm::vec3(0, 5, 0));
 	carBody->setBoxCollision(glm::vec3(2, 1, 1));
-	RigidBodyStatic *trackBody = pEngine.createRigidBodyStatic();
+	RigidBodyStatic *groungBody = pEngine.createRigidBodyStatic();
 
 	// Graphic
 	//---------------------Begin-----------------------------
@@ -103,34 +110,36 @@ int main(int argc, char* argv[])
 	engine.createWindows(true, 1920, 1080);
 	engine.init();
 	engine.setActiveCamera(cam);
+	
+
 	ShaderDirectX *shader = new ShaderDirectX(engine.getDevice());
+	shader->loadTexture("matCapTester.png");
 
-
-	Box *carObject = new Box(glm::vec3(2, 1, 1));
-	carObject->setShader(shader);
+	
 	Box *point1 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point1->setShader(shader);
 	point1->setColor(glm::vec3(0, 1, 0));
-	point1->setParent(carObject);
+	//point1->setParent(carObject);
 
 	Box *test = new Box(glm::vec3(2, 2, 2));
 	test->setLocation(glm::vec3(0, 15, 0));
 	test->setColor((glm::vec3(1, 0, 1)));
 	test->setShader(shader);
+
 	Box *point2 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point2->setShader(shader);
 	point2->setColor(glm::vec3(0, 1, 0));
-	point2->setParent(carObject);
+	//point2->setParent(carObject);
 
 	Box *point3 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point3->setShader(shader);
 	point3->setColor(glm::vec3(0, 1, 0));
-	point3->setParent(carObject);
+	//point3->setParent(carObject);
 
 	Box *point4 = new Box(glm::vec3(0.2, 0.2, 0.2));
 	point4->setShader(shader);
 	point4->setColor(glm::vec3(0, 1, 0));
-	point4->setParent(carObject);
+	//point4->setParent(carObject);
 
 	point1->setLocation(glm::vec3(2.5, 0.5, 2.5));
 	point2->setLocation(glm::vec3(2.5, 0.5, -2.5));
@@ -154,25 +163,49 @@ int main(int argc, char* argv[])
 	pointIntersect4->setColor(glm::vec3(0, 1, 0));
 
 
+
+	//////////------------------ GROUND ------------------------
+	ShaderDirectX *shaderGround = new ShaderDirectX(*shader);
+	shaderGround->loadTexture("New_Graph_basecolor.png");
 	std::vector<float> rawVertex;
 	std::vector<float> rawNormal;
 	std::vector<float> rawUV;
+	loadModel("groungTest.obj",rawVertex, rawNormal, rawUV);
 
-	loadModel(rawVertex, rawNormal, rawUV);
+	TriangleMeshObject *groungObject = new TriangleMeshObject(rawVertex, rawNormal, rawUV);
+	groungObject->setShader(shaderGround);
+	groungObject->setColor(glm::vec3(1, 0.5, 1));
+	groungBody->setTraiangleMesh(rawVertex);
+
+	//////////------------------ CAR ------------------------
+	loadModel("carM.obj", rawVertex, rawNormal, rawUV);
+
+	ShaderDirectX *carShader= new ShaderDirectX(*shader);
+	carShader->loadTexture("carTex.png");
+
+	TriangleMeshObject *carObject = new TriangleMeshObject(rawVertex, rawNormal, rawUV);
+	carObject->setShader(carShader);
+	point1->setParent(carObject);
+	point2->setParent(carObject);
+	point3->setParent(carObject);
+	point4->setParent(carObject);
+	//////////------------------ TRACK ------------------------
+	ShaderDirectX *trackGround = new ShaderDirectX(*shader);
+	trackGround->loadTexture("roads.png");
+	loadModel("trackTest.obj", rawVertex, rawNormal, rawUV);
 
 	TriangleMeshObject *trackObject = new TriangleMeshObject(rawVertex, rawNormal, rawUV);
-	trackObject->setLocation(glm::vec3(0, 0, 0));
-	trackObject->setShader(shader);
+	trackObject->setShader(trackGround);
 	trackObject->setColor(glm::vec3(1, 0.5, 1));
-	trackBody->setTraiangleMesh(rawVertex);
 
 	engine.addGemeObject(carObject);
+	engine.addGemeObject(groungObject);
 	engine.addGemeObject(trackObject);
-	engine.addGemeObject(pointIntersect4);
 	engine.addGemeObject(test);
-	engine.addGemeObject(pointIntersect3);
-	engine.addGemeObject(pointIntersect2);
 	engine.addGemeObject(pointIntersect1);
+	engine.addGemeObject(pointIntersect2);
+	engine.addGemeObject(pointIntersect3);
+	engine.addGemeObject(pointIntersect4);
 	engine.addGemeObject(point1);
 	engine.addGemeObject(point2);
 	engine.addGemeObject(point3);
@@ -181,7 +214,8 @@ int main(int argc, char* argv[])
 
 	MSG msg{ 0 };
 	// здесь должен быть фрагмент кода, время выполнения которого нужно измерить
-
+	float timer = clock();
+	int fpsCount = 0;
 	while (WM_QUIT != msg.message)
 	{
 
@@ -192,13 +226,13 @@ int main(int argc, char* argv[])
 		}
 		unsigned int start = clock(); // конечное время
 
-		//Sleep(16);
+		Sleep(10);
 		carObject->setModelMatrix(carBody->getWorldMatrix());
-		trackObject->setModelMatrix(trackBody->getWorldMatrix());
+		groungObject->setModelMatrix(groungBody->getWorldMatrix());
 		Box *boxArr[] = { point1, point2, point3, point4 };
 		Box *boxIntersectArr[] = { pointIntersect1, pointIntersect2, pointIntersect3, pointIntersect4 };
 
-		std::cout << deltaTime << std::endl;
+		//std::cout << deltaTime << std::endl;
 
 		//carBody->addForce(glm::vec3(0, -100, 0));
 
@@ -213,7 +247,7 @@ int main(int argc, char* argv[])
 			bool status = pEngine.raycast(pos, -glm::normalize(carObject->getUp()), maxDistance, hit);
 			if (status)
 			{
-				carBody->addForceAtPos(glm::vec3(0, 1, 0) * 100.0f * (1.0f - (hit.block.distance / 3.0f)), pos);
+				carBody->addForceAtPos(glm::vec3(0, 1, 0) * 100.0f * (1.0f - (hit.block.distance / 2.0f)), pos);
 				boxIntersectArr[i]->setLocation(glm::vec3(hit.block.position.x, hit.block.position.y, hit.block.position.z));
 				globalStatus = true;
 			}
@@ -235,24 +269,36 @@ int main(int argc, char* argv[])
 				carBody->addForce(carObject->getForward() * 1000.0f);
 
 			if (GetAsyncKeyState(VK_RIGHT))
-				carBody->addRelativeTorque(glm::vec3(0, -30, 0));
+				carBody->addRelativeTorque(glm::vec3(0, -100, 0));
 
 			if (GetAsyncKeyState(VK_LEFT))
-				carBody->addRelativeTorque(glm::vec3(0, 30, 0));
+				carBody->addRelativeTorque(glm::vec3(0, 100, 0));
 		}
 
-		carBody->setLinearVelocity(carBody->getLinearVelocity() * (1.0f - deltaTime * 3.0f));
-		carBody->setAngularVelocity(carBody->getAngularVelocity() * (1.0f - deltaTime * 10.0f));
+		carBody->setLinearVelocity(carBody->getLinearVelocity() * (1.0f - deltaTime * 2.0f));
+		carBody->setAngularVelocity(carBody->getAngularVelocity() * (1.0f - deltaTime * 2.0f));
+
+		carBody->setAngularVelocity(glm::vec3(0,0,0));
 
 		glm::vec3 carPos = carObject->getModelMatrix()[3];
 		glm::vec3 camOffset = carObject->getForward() * 10.0f;
 		cam->setTarget(carPos);
-		cam->setLocation(glm::vec3(carPos.x + camOffset.x, 7, carPos.z + camOffset.z));
-
-		pEngine.simulate(0.001);
+		PxRaycastBuffer hit;
+		pEngine.raycast(glm::vec3(carPos.x + camOffset.x, carPos.y+10, carPos.z + camOffset.z), glm::normalize(glm::vec3(0,-1,0)), 100, hit);
+		cam->setLocation(glm::vec3(carPos.x + camOffset.x, hit.block.position.y+7, carPos.z + camOffset.z));
+		//std::cout << hit.block.position.y << std::endl;
+		pEngine.simulate(0.01);
 		engine.render();
+		fpsCount++;
 		unsigned int end = clock();
 		deltaTime = (float)(end - start) / 1000.0f;
+
+		if (clock() - timer > 1000)
+		{
+			timer = clock();
+			std::cout << fpsCount << std::endl;
+			fpsCount = 0;
+		}
 
 	}
 	std::cout << "\nLooping ended" << std::endl;

@@ -19,7 +19,7 @@ void TriangleMeshObject::init(ID3D11Device * device)
 	{
 		int indexVertex = i * 3;
 		int indexUV = i * 2;
-		arrVertex[i] = { glm::vec3(rawVertex[indexVertex], rawVertex[indexVertex + 1], rawVertex[indexVertex + 2]), glm::vec2(rawUV[indexUV], rawUV[indexUV + 1]) };
+		arrVertex[i] = { glm::vec3(rawVertex[indexVertex], rawVertex[indexVertex + 1], rawVertex[indexVertex + 2]), glm::vec2(rawUV[indexUV], 1.0f - rawUV[indexUV + 1]) };
 	}
 
 	for (int i = 0; i < triangleCount; i += 3)

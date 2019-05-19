@@ -32,7 +32,6 @@ void Box::init(ID3D11Device *device)
 		{ glm::vec3(extent.x,  extent.y,  -extent.z), glm::vec2(0.0f, 1.0f) }
 	};
 
-
 	vertex = new BufferDirectX(device);
 	vertex->create(BufferType::Vertex, sizeof(OurVertices), OurVertices, sizeof(simpleVertex));
 
@@ -55,7 +54,7 @@ void Box::setShader(ShaderDirectX * shader)
 
 void Box::draw(const glm::mat4 &P, const glm::mat4 &V, const glm::mat4 &VP, ID3D11DeviceContext *deviceContext)
 {
-	glm::mat4 result = glm::transpose(VP*getModelMatrix());
+	glm::mat4 result = glm::transpose(VP * getModelMatrix());
 	matrix->update(deviceContext, &result);
 	shader->set(deviceContext);
 	vertex->set(deviceContext);

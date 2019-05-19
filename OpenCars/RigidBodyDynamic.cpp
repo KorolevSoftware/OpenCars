@@ -5,6 +5,7 @@ RigidBodyDynamic::RigidBodyDynamic(PxRigidDynamic *actor, PxPhysics *mSDK, PxCoo
 	this->actor = actor;
 	this->mSDK = mSDK;
 	this->mCooking = mCooking;
+	actor->setCMassLocalPose(PxTransform(PxVec3(1, 0, 0)));
 }
 
 void RigidBodyDynamic::addRelativeTorque(const glm::vec3 &torque)
@@ -36,7 +37,6 @@ void RigidBodyDynamic::setBoxCollision(const glm::vec3 size)
 	shape = PxRigidActorExt::createExclusiveShape(*actor, PxBoxGeometry(size.x, size.y, size.z), *mMaterial);
 	if (!shape)
 		std::cerr << "create shape failed!";
-
 }
 
 void RigidBodyDynamic::setLocation(const glm::vec3 location)

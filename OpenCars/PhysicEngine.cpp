@@ -49,12 +49,8 @@ RigidBodyStatic * PhysicEngine::createRigidBodyStatic()
 
 void PhysicEngine::simulate(float time)
 {
-	if (time < 0.0001f)
-		time = 0.001f;
-
 		mScene->simulate(time);
 		mScene->fetchResults(true);
-
 }
 
 bool PhysicEngine::raycast(glm::vec3 origin, glm::vec3 direction, float maxDistance, PxRaycastBuffer &hit)

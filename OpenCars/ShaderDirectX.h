@@ -17,6 +17,7 @@ private:
 public:
 	char *LoadShaderFile(std::string File, int &size);
 	ShaderDirectX(ID3D11Device *device);
+	void loadTexture(std::string path);
 	void set(ID3D11DeviceContext *deviceContext);
 	~ShaderDirectX();
 };

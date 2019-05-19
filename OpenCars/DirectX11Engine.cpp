@@ -6,6 +6,7 @@ LRESULT CALLBACK WndProc(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 	switch (message)
 	{
+
 	case WM_KEYDOWN:
 	{
 		switch (wParam)
@@ -52,41 +53,21 @@ void DirectX11Engine::init()
 
 void DirectX11Engine::render()
 {
-	
-	static float t = 0.0f;
-	static ULONGLONG timeStart = 0;
-	ULONGLONG timeCur = GetTickCount64();
-
-	if (timeStart == 0)
-		timeStart = timeCur;
-
-	t = (timeCur - timeStart) / 1000.0f;
-
 	// Просто очищаем задний буфер
-
 	float ClearColor[4] = { 0.0f, 1.0f, 1.0f, 1.0f }; // красный, зеленый, синий, альфа-канал
 
 	deviceContext->ClearRenderTargetView(renderTargetView, ClearColor);
 	deviceContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-
-	/*glm::mat4 transate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.0, -t*10));
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::transpose(glm::rotate(trans, glm::radians(t*10), glm::vec3(0.0f, 1.0f, 0.0f)));
-
-	DirectX::XMMATRIX projx = DirectX::XMMatrixPerspectiveFovLH(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-*/
 	glm::mat4 proj = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 1000.0f);
-
-	glm::mat4 MVP = proj*activeCamera->getViewMatrix();
+	glm::mat4 view = activeCamera->getViewMatrix();
+	glm::mat4 VP = proj * view;
 
 	for (auto i : gameObjectDraw)
-		i->draw(proj, activeCamera->getViewMatrix(), MVP, deviceContext);
-
+		i->draw(proj, view, VP, deviceContext);
 
 	// Выбросить задний буфер на экран
 	swapChain->Present(0, 0);
-
 }
 
 void DirectX11Engine::initObjects()

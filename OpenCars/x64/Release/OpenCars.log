@@ -1,17 +1,27 @@
-﻿  box.cpp
-  Camera.cpp
+﻿  compilation object save succeeded; see E:\Project\Develop\OpenCars\x64\Release\simplePixelShader.cso
+  compilation object save succeeded; see E:\Project\Develop\OpenCars\x64\Release\simpleVertexShader.cso
+  box.cpp
+  BufferDirectX.cpp
   DirectX11Engine.cpp
   GameObject.cpp
+  lodepng.cpp
+e:\project\develop\opencars\opencars\lodepng.cpp(3788): warning C4267: аргумент: преобразование из "size_t" в "unsigned int"; возможна потеря данных
+e:\project\develop\opencars\opencars\lodepng.cpp(4843): warning C4267: =: преобразование из "size_t" в "unsigned int"; возможна потеря данных
   main.cpp
-e:\project\develop\opencars\opencars\main.cpp(83): warning C4305: аргумент: усечение из "double" в "float"
-e:\project\develop\opencars\opencars\main.cpp(108): warning C4305: аргумент: усечение из "double" в "physx::PxReal"
-e:\project\develop\opencars\opencars\main.cpp(274): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
-e:\project\develop\opencars\opencars\main.cpp(275): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
-e:\project\develop\opencars\opencars\main.cpp(302): warning C4244: аргумент: преобразование "double" в "float", возможна потеря данных
+e:\project\develop\opencars\opencars\main.cpp(252): warning C4305: аргумент: усечение из "double" в "float"
+  PhysicEngine.cpp
   QuadSprite.cpp
+  RigidBodyDynamic.cpp
+  RigidBodyStatic.cpp
+e:\project\develop\opencars\opencars\rigidbodystatic.cpp(25): warning C4267: =: преобразование из "size_t" в "physx::PxU32"; возможна потеря данных
+e:\project\develop\opencars\opencars\rigidbodystatic.cpp(29): warning C4267: =: преобразование из "size_t" в "physx::PxU32"; возможна потеря данных
+  ShaderDirectX.cpp
+  TextureDirectX.cpp
+  TriangleMeshObject.cpp
+e:\project\develop\opencars\opencars\trianglemeshobject.cpp(9): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
   Создание кода
-  616 of 723 functions (85.2%) were compiled, the rest were copied from previous compilation.
-    406 functions were new in current compilation
-    7 functions had inline decision re-evaluated but remain unchanged
+  862 of 1101 functions (78.3%) were compiled, the rest were copied from previous compilation.
+    407 functions were new in current compilation
+    64 functions had inline decision re-evaluated but remain unchanged
   Создание кода завершено
   OpenCars.vcxproj -> E:\Project\Develop\OpenCars\x64\Release\OpenCars.exe
